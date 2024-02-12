@@ -1,3 +1,5 @@
 module snippetbox.doanandreas.net
 
-go 1.22.0
+go 1.20
+
+require github.com/go-sql-driver/mysql v1.7.1
