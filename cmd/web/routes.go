@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/justinas/alice"
 )
 
 func (app *application) routes() http.Handler {
@@ -14,15 +13,18 @@ func (app *application) routes() http.Handler {
 		app.notFound(w)
 	})
 
+	r.Use(app.recoverPanic, app.logRequest, secureHeaders)
+
 	fileServer := http.FileServer(http.Dir("./ui/static"))
-	r.Handle("/static/", http.StripPrefix("/static", fileServer))
+	r.Handle("/static/*", http.StripPrefix("/static", fileServer))
 
-	r.Get("/", app.home)
-	r.Get("/snippet/view/{id}", app.snippetView)
-	r.Get("/snippet/create", app.snippetCreate)
-	r.Post("/snippet/create", app.snippetCreatePost)
+	r.Group(func(r chi.Router) {
+		r.Use(app.sessionManager.LoadAndSave)
+		r.Get("/", app.home)
+		r.Get("/snippet/view/{id}", app.snippetView)
+		r.Get("/snippet/create", app.snippetCreate)
+		r.Post("/snippet/create", app.snippetCreatePost)
+	})
 
-	standard := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
-
-	return standard.Then(r)
+	return r
 }
