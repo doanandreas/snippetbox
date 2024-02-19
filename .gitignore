@@ -22,3 +22,6 @@ go.work
 
 # IntelliJ files
 /.idea
+
+# Cert files
+tls/
