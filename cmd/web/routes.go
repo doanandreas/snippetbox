@@ -16,7 +16,7 @@ func (app *application) routes() http.Handler {
 	r.Use(app.recoverPanic, app.logRequest, secureHeaders)
 
 	fileServer := http.FileServer(http.Dir("./ui/static"))
-	r.Handle("/static/", http.StripPrefix("/static", fileServer))
+	r.Handle("/static/*", http.StripPrefix("/static", fileServer))
 
 	r.Group(func(r chi.Router) {
 		r.Use(app.sessionManager.LoadAndSave)
