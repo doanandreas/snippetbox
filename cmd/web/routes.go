@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"snippetbox.doanandreas.net/ui"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -15,11 +16,11 @@ func (app *application) routes() http.Handler {
 
 	r.Use(app.recoverPanic, app.logRequest, secureHeaders)
 
-	fileServer := http.FileServer(http.Dir("./ui/static"))
-	r.Handle("/static/*", http.StripPrefix("/static", fileServer))
+	fileServer := http.FileServer(http.FS(ui.Files))
+	r.Handle("/static/*", fileServer)
 
 	r.Group(func(r chi.Router) {
-		r.Use(app.sessionManager.LoadAndSave, noSurf)
+		r.Use(app.sessionManager.LoadAndSave, noSurf, app.authenticate)
 
 		r.Get("/", app.home)
 		r.Get("/snippet/view/{id}", app.snippetView)
